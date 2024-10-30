@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Stack</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        .stack-container {
+            border: 2px solid #4A5568; /* Gray-700 */
+            padding: 20px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #F7FAFC; /* Gray-100 */
+        }
+        .stack-item {
+            background-color: #63B3ED; /* Blue-400 */
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-5">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-center">Interactive Stack</h1>
+        <div class="stack-container" id="stackContainer"></div>
+
+        <div class="mt-4">
+            <input type="text" id="inputValue" class="form-control" placeholder="Enter value" />
+            <div class="mt-2 flex justify-between">
+                <button id="pushButton" class="btn btn-primary">Push</button>
+                <button id="popButton" class="btn btn-danger">Pop</button>
+                <button id="peekButton" class="btn btn-info">Peek</button>
+                <button id="isEmptyButton" class="btn btn-warning">Is Empty?</button>
+                <button id="sizeButton" class="btn btn-secondary">Size</button>
+                <button id="clearButton" class="btn btn-dark">Clear</button>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2 class="text-xl">Output:</h2>
+            <p id="output" class="bg-gray-200 p-2 rounded"></p>
+        </div>
+    </div>
+
+    <script>
+        const stack = [];
+const stackContainer = document.getElementById('stackContainer');
+const output = document.getElementById('output');
+
+function updateStackDisplay() {
+    stackContainer.innerHTML = '';
+    stack.forEach(item => {
+        const stackItem = document.createElement('div');
+        stackItem.className = 'stack-item';
+        stackItem.textContent = item;
+        stackContainer.appendChild(stackItem);
+    });
+}
+
+document.getElementById('pushButton').addEventListener('click', () => {
+    const inputValue = document.getElementById('inputValue').value;
+    if (inputValue) {
+        stack.push(inputValue);
+        updateStackDisplay();
+        output.textContent = `${inputValue} pushed onto the stack.`;
+        document.getElementById('inputValue').value = ''; // Clear input
+    } else {
+        output.textContent = 'Please enter a value.';
+    }
+});
+
+document.getElementById('popButton').addEventListener('click', () => {
+    if (stack.length > 0) {
+        const poppedValue = stack.pop();
+        updateStackDisplay();
+        output.textContent = `${poppedValue} popped from the stack.`;
+    } else {
+        output.textContent = 'Stack is empty.';
+    }
+});
+
+document.getElementById('peekButton').addEventListener('click', () => {
+    if (stack.length > 0) {
+        const topValue = stack[stack.length - 1];
+        output.textContent = `Top value is ${topValue}.`;
+    } else {
+        output.textContent = 'Stack is empty.';
+    }
+});
+
+document.getElementById('isEmptyButton').addEventListener('click', () => {
+    if (stack.length === 0) {
+        output.textContent = 'The stack is empty.';
+    } else {
+        output.textContent = 'The stack is not empty.';
+    }
+});
+
+document.getElementById('sizeButton').addEventListener('click', () => {
+    output.textContent = `The size of the stack is ${stack.length}.`;
+});
+
+document.getElementById('clearButton').addEventListener('click', () => {
+    stack.length = 0; // Clear the stack
+    updateStackDisplay();
+    output.textContent = 'The stack has been cleared.';
+});
+    </script>
+</body>
+</html>

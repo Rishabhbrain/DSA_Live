@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Queue</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .queue-container {
+      border: 2px solid #4A5568;
+      padding: 20px;
+      border-radius: 8px;
+      height: 100px;
+      overflow: hidden;
+      background-color: #F7FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+    .queue-item {
+      background-color: #63B3ED;
+      padding: 10px;
+      margin-left: 10px;
+      border-radius: 4px;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    .queue-item-leave {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    .pointer {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .front-pointer, .rear-pointer {
+      border: 10px solid transparent;
+    }
+    .front-pointer {
+      border-bottom: 20px solid red;
+      left: -25px;
+    }
+    .rear-pointer {
+      border-top: 20px solid green;
+      right: -25px;
+    }
+    .pointer-label {
+      font-weight: bold;
+      color: #4A5568;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .illustration {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .illustration img {
+      width: 150px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-5">
+  <div class="container mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-center">Interactive Queue</h1>
+    
+    <div class="illustration">
+      <img src="https://example.com/queue-illustration.png" alt="Queue Illustration" />
+    </div>
+
+    <div class="queue-container" id="queueContainer">
+      <div class="pointer" id="frontPointer">
+        <div class="front-pointer"></div>
+        <div class="pointer-label">Front</div>
+      </div>
+      <div class="pointer" id="rearPointer">
+        <div class="rear-pointer"></div>
+        <div class="pointer-label">Rear</div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <input type="text" id="inputValue" class="form-control" placeholder="Enter value" />
+      <div class="mt-2 flex justify-between">
+        <button id="enqueueButton" class="btn btn-primary">Enqueue</button>
+        <button id="dequeueButton" class="btn btn-danger">Dequeue</button>
+        <button id="peekButton" class="btn btn-info">Peek</button>
+        <button id="isEmptyButton" class="btn btn-warning">Is Empty?</button>
+        <button id="sizeButton" class="btn btn-secondary">Size</button>
+        <button id="clearButton" class="btn btn-dark">Clear</button>
+        <button id="togglePointersButton" class="btn btn-success">Toggle Pointers</button>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h2 class="text-xl">Output:</h2>
+      <p id="output" class="bg-gray-200 p-2 rounded"></p>
+    </div>
+  </div>
+
+  <script>
+    const queue = [];
+    const queueContainer = document.getElementById('queueContainer');
+    const output = document.getElementById('output');
+    const frontPointer = document.getElementById('frontPointer');
+    const rearPointer = document.getElementById('rearPointer');
+
+    function updateQueueDisplay() {
+      queueContainer.innerHTML = '';
+      queue.forEach((item, index) => {
+        const queueItem = document.createElement('div');
+        queueItem.className = 'queue-item';
+        queueItem.textContent = item;
+        queueContainer.appendChild(queueItem);
+        
+        // Position pointers
+        if (index === 0) {
+          frontPointer.style.left = `${queueItem.offsetLeft + queueItem.offsetWidth / 2 - 10}px`;
+        }
+        if (index === queue.length - 1) {
+          rearPointer.style.left = `${queueItem.offsetLeft + queueItem.offsetWidth / 2 - 10}px`;
+        }
+      });
+
+      // Append pointers and labels
+      queueContainer.appendChild(frontPointer);
+      queueContainer.appendChild(rearPointer);
+    }
+
+    document.getElementById('enqueueButton').addEventListener('click', () => {
+      const inputValue = document.getElementById('inputValue').value.trim();
+      if (inputValue) {
+        queue.push(inputValue);
+        updateQueueDisplay();
+        output.textContent = `${inputValue} enqueued to the queue.`;
+        document.getElementById('inputValue').value = ''; // Clear input
+      } else {
+        output.textContent = 'Please enter a value.';
+      }
+    });
+
+    document.getElementById('dequeueButton').addEventListener('click', () => {
+      if (queue.length > 0) {
+        const dequeuedValue = queue.shift(); // Remove from front
+        const firstItem = queueContainer.firstChild;
+
+        // Animate removal
+        if (firstItem) {
+          firstItem.classList.add('queue-item-leave');
+          setTimeout(() => {
+            updateQueueDisplay();
+            output.textContent = `${dequeuedValue} dequeued from the queue.`;
+          }, 500); // Match animation duration
+        }
+      } else {
+        output.textContent = 'Queue is empty.';
+      }
+    });
+
+    document.getElementById('peekButton').addEventListener('click', () => {
+      if (queue.length > 0) {
+        const frontValue = queue[0];
+        output.textContent = `Front value is ${frontValue}.`;
+      } else {
+        output.textContent = 'Queue is empty.';
+      }
+    });
+
+    document.getElementById('isEmptyButton').addEventListener('click', () => {
+      output.textContent = queue.length === 0 ? 'The queue is empty.' : 'The queue is not empty.';
+    });
+
+    document.getElementById('sizeButton').addEventListener('click', () => {
+      output.textContent = `The size of the queue is ${queue.length}.`;
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+      queue.length = 0; // Clear the queue
+      updateQueueDisplay();
+      output.textContent = 'The queue has been cleared.';
+    });
+
+    // Toggle pointers visibility
+    document.getElementById('togglePointersButton').addEventListener('click', () => {
+      frontPointer.style.display = frontPointer.style.display === 'none' ? 'flex' : 'none';
+      rearPointer.style.display = rearPointer.style.display === 'none' ? 'flex' : 'none';
+    });
+  </script>
+</body>
+</html>

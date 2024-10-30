@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Linked List</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7fafc; /* Gray-100 */
+        }
+        .list-container {
+            border: 2px solid #4A5568; /* Gray-700 */
+            padding: 20px;
+            border-radius: 8px;
+            height: 200px; /* Adjust height */
+            overflow: hidden;
+            background-color: #F7FAFC; /* Gray-100 */
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+        .node {
+            background-color: #63B3ED; /* Blue-400 */
+            padding: 10px;
+            margin-right: 10px; /* Space between nodes */
+            border-radius: 4px;
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+        .node::after {
+            content: '→'; /* Arrow symbol for next pointer */
+            position: absolute;
+            right: -15px; /* Position arrow to the right of the node */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+        .node:last-child::after {
+            content: ''; /* No arrow for the last node */
+        }
+        .address {
+            font-size: 12px;
+            color: #2D3748; /* Gray-800 */
+        }
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+        .head-pointer {
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid red; /* Head pointer color */
+            left: -15px; /* Position to the left of the list */
+        }
+        .tail-pointer {
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid green; /* Tail pointer color */
+            right: -15px; /* Position to the right of the list */
+        }
+    </style>
+</head>
+<body class="p-5">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-center">Interactive Linked List</h1>
+
+        <div class="list-container" id="listContainer"></div>
+
+        <div class="mt-4">
+            <input type="text" id="inputValue" class="form-control" placeholder="Enter value" />
+            
+            <select id="operationSelect" class="form-control mt-2">
+                <option value="" disabled selected>Select Operation</option>
+                <option value="addEnd">Add to End</option>
+                <option value="addBeginning">Add to Beginning</option>
+                <option value="addSpecific">Add at Specific Position</option>
+                <option value="removeSpecific">Remove from Specific Position</option>
+                <option value="removeFirst">Remove First Node</option>
+                <option value="removeLast">Remove Last Node</option>
+                <option="">Clear All</option>
+                </select>
+
+                <input type="number" id="positionInput" class="form-control mt-2" placeholder="Position (0-indexed)" style="display:none;" />
+
+                <div class="mt-2 flex justify-between">
+                    <button id="executeButton" class="btn btn-primary">Execute</button>
+                    <button id="togglePointersButton" class="btn btn-success">Toggle Pointers</button>
+                </div>
+
+                <div class="mt-4">
+                    <h2 class="text-xl">Output:</h2>
+                    <p id="output" class="bg-gray-200 p-2 rounded"></p>
+                </div>
+
+        </div>
+    </div>
+
+    <script >
+        const linkedList = [];
+const listContainer = document.getElementById('listContainer');
+const output = document.getElementById('output');
+const headPointer = document.createElement('div');
+const tailPointer = document.createElement('div');
+headPointer.className = 'pointer head-pointer';
+tailPointer.className = 'pointer tail-pointer';
+
+function updateListDisplay() {
+    listContainer.innerHTML = '';
+    
+    linkedList.forEach((item) => {
+        const node = document.createElement('div');
+        node.className = 'node';
+        
+        // Display value and address
+        node.innerHTML = `${item.value} <br><span class='address'>Address: ${item.address}</span>`;
+        
+        // Show animation for adding nodes
+        if (item.isNew) {
+           node.style.transform = 'scale(1.5)';
+           setTimeout(() => { 
+               node.style.transform = 'scale(1)'; 
+               item.isNew = false; 
+           }, 500);
+        }
+
+        listContainer.appendChild(node);
+    });
+    
+    // Append pointers
+    if (linkedList.length > 0) {
+        listContainer.appendChild(headPointer);
+        listContainer.appendChild(tailPointer);
+    } else {
+        headPointer.style.display = 'none';
+        tailPointer.style.display = 'none';
+    }
+}
+
+function generateAddress() {
+    return Math.floor(Math.random() * 10000).toString(16); // Simulated address
+}
+
+document.getElementById('executeButton').addEventListener('click', () => {
+    const inputValue = document.getElementById('inputValue').value.trim();
+    const selectedOperation = document.getElementById('operationSelect').value;
+
+    if (selectedOperation === "addEnd") {
+        if (inputValue) {
+            linkedList.push({ value: inputValue, address: generateAddress(), isNew: true });
+            updateListDisplay();
+            output.textContent = `${inputValue} added to the end of the linked list.`;
+        } else {
+            output.textContent = 'Please enter a value.';
+        }
+    } else if (selectedOperation === "addBeginning") {
+        if (inputValue) {
+            linkedList.unshift({ value: inputValue, address: generateAddress(), isNew: true });
+            updateListDisplay();
+            output.textContent = `${inputValue} added to the beginning of the linked list.`;
+        } else {
+            output.textContent = 'Please enter a value.';
+        }
+    } else if (selectedOperation === "addSpecific") {
+        const posIndex = parseInt(document.getElementById('positionInput').value);
+        
+        if (!isNaN(posIndex) && inputValue) {
+           if (posIndex >= 0 && posIndex <= linkedList.length) {
+
+               // Create new node with address and animate
+               const newNode = { value: inputValue, address: generateAddress(), isNew: true };
+               
+               // Change addresses of surrounding nodes
+               if (posIndex > 0) { 
+                   linkedList[posIndex - 1].address = newNode.address; // Update left node's address
+                   newNode.nextAddress = linkedList[posIndex].address; // New node points to right node's address
+               }
+
+               linkedList.splice(posIndex, 0, newNode);
+               updateListDisplay();
+               output.textContent = `${inputValue} added at position ${posIndex}.`;
+           } else {
+               output.textContent = 'Invalid position.';
+           }
+       } else {
+           output.textContent = 'Please enter a valid position and value.';
+       }
+   } else if (selectedOperation === "removeSpecific") {
+       const posIndex = parseInt(document.getElementById('positionInput').value);
+       if (!isNaN(posIndex)) {
+           if (posIndex >= 0 && posIndex < linkedList.length) {
+               const removedNode = linkedList.splice(posIndex, 1)[0];
+               updateListDisplay();
+               output.textContent = `${removedNode.value} removed from position ${posIndex}.`;
+           } else {
+               output.textContent = 'Invalid position.';
+           }
+       } else {
+           output.textContent = 'Please enter a valid position.';
+       }
+   } else if (selectedOperation === "removeFirst") {
+       if (linkedList.length > 0) {
+           const removedNode = linkedList.shift(); // Remove from front
+           updateListDisplay();
+           output.textContent = `${removedNode.value} removed from the beginning of the linked list.`;
+       } else {
+           output.textContent = 'Linked list is empty.';
+       }
+   } else if (selectedOperation === "removeLast") {
+       if (linkedList.length > 0) {
+           const removedNode = linkedList.pop(); // Remove from end
+           updateListDisplay();
+           output.textContent = `${removedNode.value} removed from the end of the linked list.`;
+       } else {
+           output.textContent = 'Linked list is empty.';
+       }
+   } else if (selectedOperation === "") { // Clear All
+       linkedList.length = 0; // Clear the linked list
+       updateListDisplay();
+       output.textContent = 'The linked list has been cleared.';
+   }
+
+   // Clear input field after execution
+   document.getElementById('inputValue').value = '';
+   document.getElementById('positionInput').value = '';
+});
+
+document.getElementById('operationSelect').addEventListener('change', function() {
+   if (this.value === "addSpecific" || this.value === "removeSpecific") {
+       document.getElementById('positionInput').style.display = 'block'; // Show input for specific position
+   } else {
+       document.getElementById('positionInput').style.display = 'none'; // Hide input for other actions
+   }
+});
+
+// Toggle pointers visibility
+document.getElementById('togglePointersButton').addEventListener('click', () => {
+   headPointer.style.display = headPointer.style.display === 'none' ? 'block' : 'none';
+   tailPointer.style.display = tailPointer.style.display === 'none' ? 'block' : 'none';
+});
+    </script>
+</body>
+</html>
